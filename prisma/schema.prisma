@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String         @id @default(cuid())
+  email                  String         @unique
+  hashedPassword         String
+  fullName               String?
+  companyName            String?
+  plan                   String         @default("free")
+  paddleCustomerId       String?
+  paddleSubscriptionId   String?
+  documentsUsedThisMonth Int            @default(0)
+  monthlyResetDate       DateTime
+  isActive               Boolean        @default(true)
+  createdAt              DateTime       @default(now())
+  documents              Document[]
+  products               Product[]
+  brokerRequests         BrokerReview[]
+  tariffAlerts           TariffAlert[]
+  storage                UserStorage?
+  subscriptions          Subscription[]
+}
+
+model Document {
+  id                    String    @id @default(cuid())
+  userId                String
+  filename              String
+  originalFilename      String
+  filePath              String
+  fileSizeBytes         Int
+  fileType              String
+  checksumMd5           String
+  documentType          String    @default("unknown")
+  status                String    @default("processing")
+  extractedDataJson     String    @default("{}")
+  validationFlagsJson   String    @default("[]")
+  confidenceScore       Int       @default(0)
+  processingTimeMs      Int?
+  uploadedAt            DateTime  @default(now())
+  processingStartedAt   DateTime?
+  processingCompletedAt DateTime?
+  lastViewedAt          DateTime?
+  lastExportedAt        DateTime?
+  manuallyEditedAt      DateTime?
+  deletedAt             DateTime?
+  expiresAt             DateTime
+  isArchived            Boolean   @default(false)
+  archivePath           String?
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brokerReviews         BrokerReview[]
+
+  @@index([userId, uploadedAt])
+  @@index([checksumMd5])
+}
+
+model UserStorage {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  totalBytesUsed         BigInt   @default(0)
+  documentCountTotal     Int      @default(0)
+  documentCountThisMonth Int      @default(0)
+  storageLimitBytes      BigInt
+  lastCalculatedAt       DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  paddleSubscriptionId String   @unique
+  plan                 String
+  status               String
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime @default(now())
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id                 String   @id @default(cuid())
+  userId             String
+  sku                String
+  name               String
+  customsDescription String
+  hsCode             String
+  countryOfOrigin    String
+  material           String?
+  defaultLane        String?
+  confidenceNote     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tariffAlerts       TariffAlert[]
+
+  @@unique([userId, sku])
+  @@index([userId, name])
+}
+
+model TariffAlert {
+  id        String   @id @default(cuid())
+  userId    String
+  skuId     String
+  hsCode    String
+  alertType String
+  title     String
+  body      String
+  lane      String
+  severity  String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sku       Product  @relation(fields: [skuId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@index([skuId])
+}
+
+model BrokerReview {
+  id             String    @id @default(cuid())
+  userId         String
+  documentId     String
+  brokerEmail    String
+  clientName     String?
+  note           String?
+  status         String    @default("requested")
+  createdAt      DateTime  @default(now())
+  reviewedAt     DateTime?
+  brokerFeedback String?
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document       Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([brokerEmail])
+}
