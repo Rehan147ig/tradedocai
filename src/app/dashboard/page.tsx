@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { StatusBadge } from "@/components/StatusBadge";
 import { formatBytes } from "@/lib/plans";
+import { TourButton, useAutoTour } from "@/components/Tour";
 
 type DocumentRow = {
   id: string;
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   const [unreadAlerts, setUnreadAlerts] = useState(0);
 
   useEffect(() => {
+    autoTour();
     const token = localStorage.getItem("tradedocai_token");
     if (!token) {
       location.href = "/login";
@@ -61,16 +63,29 @@ export default function DashboardPage() {
     };
   }, [data]);
 
+  const autoTour = useAutoTour("dashboard", 1400);
+
   return (
     <div className="dashboard">
       <Sidebar />
       <main className="main">
-        <h2>Dashboard</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={{ margin: 0 }}>Dashboard</h2>
+          <TourButton tourId="dashboard" label="Tour dashboard" />
+        </div>
         {error ? <p style={{ color: "var(--red)" }}>{error}</p> : null}
         {!data ? <p className="muted">Loading dashboard...</p> : null}
         {data ? (
           <>
-            <div className="panel dashboard-cta">
+            <div id="tour-dashboard-cta" className="panel dashboard-cta" style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center" }}>
+              <div>
+                <div className="eyebrow">New — Shopify ClearShip (easiest)</div>
+                <h2 style={{ margin: "6px 0" }}>Connect Shopify → orders cleared automatically</h2>
+                <p className="muted" style={{ margin: 0 }}>30 sec setup. No PDFs. We watch orders, check HS + duties + batteries, and give 1-click docs.</p>
+              </div>
+              <Link className="button" href="/shopify">Go to Shopify →</Link>
+            </div>
+            <div className="panel dashboard-cta" style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center" }}>
               <div>
                 <div className="eyebrow">Main workflow</div>
                 <h2>Check a shipment</h2>
@@ -79,7 +94,7 @@ export default function DashboardPage() {
               <Link className="button" href="/check">Start preflight</Link>
             </div>
 
-            <div className="metrics">
+            <div id="tour-metrics" className="metrics">
               <div className="metric">
                 <span className="muted">Docs this month</span>
                 <strong>

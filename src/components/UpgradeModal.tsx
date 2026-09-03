@@ -33,7 +33,7 @@ export function UpgradeModal({ feature, requiredPlan, plan, limit, onClose }: Up
         <h3>You have reached your plan limit</h3>
         <p className="muted">{modalCopy({ feature, requiredPlan, plan, limit })}</p>
         <div className="actions">
-          <Link className="button" href="/billing/upgrade">Upgrade to Pro — $79/mo</Link>
+          <Link className="button" href="/pricing">Upgrade to Pro — See plans</Link>
           <Link className="button secondary" href="/pricing">See all plan features</Link>
           <button className="button secondary" onClick={onClose}>Close</button>
         </div>

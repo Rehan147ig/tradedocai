@@ -1093,6 +1093,11 @@ th {
   color: var(--muted);
 }
 
+.tradedocai-driver .driver-popover-title { color: var(--navy); font-weight: 800; }
+.tradedocai-driver .driver-popover-description { color: var(--ink); line-height: 1.5; }
+.tradedocai-driver .driver-popover-progress-text { color: var(--muted); }
+.tradedocai-driver .driver-popover-footer button { font-weight: 700; }
+
 @media (max-width: 900px) {
   .hero,
   .dashboard,

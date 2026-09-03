@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { TourButton, useAutoTour } from "@/components/Tour";
 
 const lanes = [
   ["india-uk", "India to UK"],
@@ -25,6 +26,7 @@ export default function CheckPage() {
   const [loading, setLoading] = useState(false);
   const [stepText, setStepText] = useState("");
   const [upgrade, setUpgrade] = useState<{ feature: string; requiredPlan: string; plan?: string; limit?: number } | null>(null);
+  const autoTour = useAutoTour("check", 1200);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -75,12 +77,13 @@ export default function CheckPage() {
       <Sidebar />
       <main className="main check-flow">
         {upgrade ? <UpgradeModal feature={upgrade.feature} requiredPlan={upgrade.requiredPlan} plan={upgrade.plan} limit={upgrade.limit} onClose={() => setUpgrade(null)} /> : null}
-        <div className="flow-hero">
+        <div id="tour-check-hero" className="flow-hero" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
           <div>
             <div className="eyebrow">One simple workflow</div>
             <h2>Check a shipment before you send it.</h2>
             <p className="muted">Choose the route, upload invoice PDFs, then TradeDocAI checks documents, storage, SKU memory, landed-cost risk, and broker-ready outputs in one run.</p>
           </div>
+          <TourButton tourId="check" label="How it works" />
         </div>
 
         <form className="flow-grid" onSubmit={submit}>
@@ -109,7 +112,7 @@ export default function CheckPage() {
             </div>
           </section>
 
-          <section className="flow-step flow-upload">
+          <section id="tour-check-upload" className="flow-step flow-upload">
             <span className="step-number">3</span>
             <h3>Upload invoice</h3>
             <label className="upload-zone">

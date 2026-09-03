@@ -13,6 +13,8 @@ model User {
   hashedPassword         String
   fullName               String?
   companyName            String?
+  companyCountry         String?
+  companyAddress         String?
   plan                   String         @default("free")
   paddleCustomerId       String?
   paddleSubscriptionId   String?
@@ -26,6 +28,8 @@ model User {
   tariffAlerts           TariffAlert[]
   storage                UserStorage?
   subscriptions          Subscription[]
+  shops                  Shop[]
+  shipmentDecisions      ShipmentDecision[]
 }
 
 model Document {
@@ -139,4 +143,113 @@ model BrokerReview {
 
   @@index([userId, createdAt])
   @@index([brokerEmail])
+}
+
+model Shop {
+  id                String   @id @default(cuid())
+  userId            String
+  shopDomain        String   @unique
+  accessToken       String
+  scope             String?
+  installedAt       DateTime @default(now())
+  uninstalledAt     DateTime?
+  isActive          Boolean  @default(true)
+  webhookVerified   Boolean  @default(false)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders            ShopifyOrder[]
+  decisions         ShipmentDecision[]
+
+  @@index([userId])
+  @@index([shopDomain])
+}
+
+model ShopifyOrder {
+  id                String   @id @default(cuid())
+  shopId            String
+  shopDomain        String
+  shopifyOrderId    String
+  shopifyOrderNumber String?
+  orderName         String?
+  email             String?
+  currency          String?
+  totalPrice        String?
+  subtotalPrice     String?
+  totalTax          String?
+  financialStatus   String?
+  fulfillmentStatus String?
+  destinationCountry String?
+  destinationCity   String?
+  shippingAddressJson String @default("{}")
+  billingAddressJson  String @default("{}")
+  lineItemsJson     String @default("[]")
+  rawPayloadJson    String @default("{}")
+  createdAt         DateTime @default(now())
+  shopifyCreatedAt  DateTime?
+  updatedAt         DateTime @updatedAt
+  shop              Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, shopifyOrderId])
+  @@index([shopDomain, shopifyCreatedAt])
+  @@index([shopId, createdAt])
+}
+
+model ShipmentDecision {
+  id                String   @id @default(cuid())
+  userId            String
+  shopId            String?
+  shopDomain        String?
+  shopifyOrderId    String?
+  documentId        String?
+  shopifyOrderNumber String?
+  lane              String   @default("global")
+  status            String   @default("needs_review")
+  confidence        Int      @default(0)
+  hsRecommendationsJson String @default("[]")
+  flagsJson         String @default("[]")
+  auditTrailJson    String @default("{}")
+  inputJson         String @default("{}")
+  outputJson        String @default("{}")
+  interfazeRunId    String?
+  interfazeWorkflow String?
+  processingTimeMs  Int?
+  brokerStatus      String   @default("not_required")
+  carrierPayloadJson String @default("{}")
+  invoiceGenerated  Boolean  @default(false)
+  approvalStatus    String   @default("pending")
+  approvedBy        String?
+  approvedAt        DateTime?
+  rejectionReason   String?
+  brokerToken       String?  @unique
+  brokerEmail       String?
+  brokerNote        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop              Shop?    @relation(fields: [shopId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([shopId, createdAt])
+  @@index([shopifyOrderId])
+  @@index([status])
+  @@index([approvalStatus])
+}
+
+model RestrictedRule {
+  id                String   @id @default(cuid())
+  category          String
+  hsPrefix          String?
+  hsCode            String?
+  countryFrom       String?
+  countryTo         String?
+  lane              String?
+  ruleType          String
+  title             String
+  body              String
+  severity          String   @default("warning")
+  sourceUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([category, lane])
+  @@index([hsPrefix])
 }

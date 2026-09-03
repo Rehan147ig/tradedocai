@@ -30,6 +30,7 @@ export function Sidebar() {
       <Link className="sidebar-primary" href="/check">Check Shipment</Link>
       <Link href="/cross-check">Cross-Check Documents</Link>
       <Link href="/dashboard">Dashboard</Link>
+      <Link href="/shopify">Shopify ClearShip</Link>
       <Link href="/storage">Document Storage</Link>
       <Link href="/upload">Upload</Link>
       <Link href="/bulk">Bulk Check</Link>
